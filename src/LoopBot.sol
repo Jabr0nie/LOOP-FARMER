@@ -40,7 +40,7 @@ function collectRewards() external payable;
 function ViewBin() external view returns(uint256);
 function ViewNoOfBins() external view returns(uint256);
 function rebalance() external payable;
-function compoundMoeHalf() external payable;
+function compoundMoePercent(uint256 percent) external payable;
 function collectRewardsManual(uint256 ManualDepositID) external payable;
 }
 
@@ -55,16 +55,17 @@ address admin;
     }
 
 uint256 CurrentDepositID;
-address tokenX = 0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb8; //WMNT
-address tokenY = 0x201EBa5CC46D216Ce6DC03F6a759e8E766e956aE; //tokenY USDT
-address LBPool = 0xf6C9020c9E915808481757779EDB53DACEaE2415; //Unique to each pool
+address tokenX = 0x371c7ec6D8039ff7933a2AA28EB827Ffe1F52f07; //WMNT
+address tokenY = 0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb8; //tokenY USDT
+address LBPool = 0xeBCf4786cd1A47FE6A8ca75Af674aDd06c84f4b4; //Unique to each pool
 address LBrouter = 0x013e138EF6008ae5FDFDE29700e3f2Bc61d21E3a;
 address MoeRewarder = 0x08A62Eb0ef6DbE762774ABF5e18F49671559285b;//Unique to each pool
 address Moe = 0x4515A45337F461A11Ff0FE8aBF3c606AE5dC00c9; 
 address router = 0xeaEE7EE68874218c3558b40063c42B82D3E7232a;
-address Bot;
+address public Bot;
 
-bool USDTonly;
+bool public USDTonly;
+uint256 public percent;
 
 
 function setUSDTbool(bool setUSDTonly) public payable {
@@ -76,6 +77,10 @@ function setBOTAddress(address newBot) public payable {
     require(msg.sender == admin, "Only owner can do this");
     Bot = newBot;
 }
+function setPercent(uint256 newPercent) public payable {
+    require(msg.sender == admin, "Only owner can do this");
+    percent = newPercent;
+}
 
 function rebalance() public payable {
 
@@ -84,7 +89,7 @@ function rebalance() public payable {
         IMMBot(Bot).collectRewardstokenY();
         uint256 Moevalue = IERC20(Moe).balanceOf(Bot);
         if (Moevalue > 0) {
-            IMMBot(Bot).compoundMoeHalf();
+            IMMBot(Bot).compoundMoePercent(percent);
             IMMBot(Bot).transferToAdmin(Moe);
             }
         uint256 tokenYamount = IERC20(tokenY).balanceOf(Bot);
@@ -103,7 +108,7 @@ function rebalance() public payable {
         IMMBot(Bot).collectRewardstokenX();
         uint256 Moevalue = IERC20(Moe).balanceOf(Bot);
         if (Moevalue > 0) {
-            IMMBot(Bot).compoundMoeHalf();
+            IMMBot(Bot).compoundMoePercent(percent);
             IMMBot(Bot).transferToAdmin(Moe);
             }
         uint256 tokenYamount = IERC20(tokenY).balanceOf(Bot);
@@ -119,6 +124,7 @@ function rebalance() public payable {
     }
          
 }
+
 
 function compound() public payable {
     if (USDTonly == true) {
