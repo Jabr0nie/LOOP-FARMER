@@ -115,10 +115,10 @@ function transferToAdmin(address Token) public payable {
     IERC20(Token).transfer(to, value);
 }
 
-function compoundMoeHalf() public payable {
+function compoundMoePercent(uint256 percent) public payable {
         
         uint256 moeBalance = IERC20(Moe).balanceOf(address(this));
-        uint256 amountIn = moeBalance / 2;
+        uint256 amountIn = (moeBalance * percent)/ 100;
 
         address[] memory path = new address[](2);
         path[0] = 0x4515A45337F461A11Ff0FE8aBF3c606AE5dC00c9; //Moe token
@@ -408,6 +408,8 @@ ILBRouter(LBrouter).removeLiquidity(
 
 
 }
+
+
 
 
 
